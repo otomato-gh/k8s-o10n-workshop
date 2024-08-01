@@ -1,0 +1,14 @@
+title: |
+  Kubernetes O10n Workshop
+
+gitrepo: github.com/otomato-gh/k8s-o10n-workshop
+
+slides: https://devopstrain.pro/k8s-o10n-workshop
+
+chapters:
+
+- workshop/title.md
+- workshop/intro.md
+- workshop/toc.md
+- - workshop/foundations.md
+

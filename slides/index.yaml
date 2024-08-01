@@ -1,0 +1,8 @@
+- date: 2024-09-10
+  city: Berlin,
+  country: DE
+  event: Civo Navigate
+  title: Kubernetes Performance Tuning
+- title: Kubernetes Performance Tuning
+  slides: workshop.yml.html
+
