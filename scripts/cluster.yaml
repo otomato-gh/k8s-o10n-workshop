@@ -1,0 +1,15 @@
+apiVersion: k3d.io/v1alpha5
+kind: Simple 
+metadata:
+  name: training
+servers: 1 # same as `--servers 1`
+agents: 2 # same as `--agents 2`
+image: rancher/k3s:v1.30.2-k3s2
+options:
+  k3d:
+    disableLoadbalancer: true
+  k3s:
+    extraArgs:
+    - arg: --disable=traefik
+      nodeFilters:
+        - server:*
