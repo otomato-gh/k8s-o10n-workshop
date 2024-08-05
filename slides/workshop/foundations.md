@@ -8,10 +8,63 @@ Kubernetes or not - application performance is impacted by the following:
     -   Stack depth
     -   Data structures
 - Infrastructure Resource Availability:
+    -   Storage
+    -   Network
     -   Compute (cpu time)
     -   Memory
-    -   Network
-    -   Storage (disk I/O)
+---
+## Optimizing Kubernetes Storage
+
+The following areas relate to storage:
+- Container image storage
+    -   Optimize container images
+    -   Pre-Pull container images
+- Ephemeral volumes
+    - Local volumes
+    - Remote volumes
+- Persistent volume management
+
+---
+## Optimizing Kubernetes Networking
+
+- The default `kube-proxy` relies on iptables and isn't particularly fast
+- `kube-proxy` is probably good enough for you
+
+- Unless you:
+    - routinely saturate 10G network interfaces
+    - count packet rates in millions per second
+    - run high-traffic VOIP or gaming platforms
+    - do weird things that involve millions of simultaneous connections
+        (in which case you're already familiar with kernel tuning)
+
+- If necessary, there are alternatives to kube-proxy; e.g. [kube-router](https://www.kube-router.io/)
+---
+## kube-router, IPVS
+
+- It is possible to tell kube-proxy to use IPVS
+
+- IPVS is a more powerful load balancing framework
+
+(remember: iptables was primarily designed for firewalling, not load balancing!)
+
+- It is also possible to replace kube-proxy with kube-router
+
+    - kube-router uses IPVS by default
+
+    - kube-router can also perform other functions
+
+(e.g., we can use it as a CNI plugin to provide pod connectivity)
+
+---
+
+The following areas relate to storage:
+- Container image storage
+    -   Optimize container images
+    -   Pre-Pull container images
+- Pod volume mounts
+    - Local volumes
+    - Remote volumes
+- Persistent volume management
 
 ---
 ## Measuring Resources on Kubernetes
