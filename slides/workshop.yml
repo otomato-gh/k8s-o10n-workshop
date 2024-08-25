@@ -1,5 +1,6 @@
 title: |
   Kubernetes O10n Workshop
+  (010n = Optimization)
 
 gitrepo: github.com/otomato-gh/k8s-o10n-workshop
 
@@ -12,4 +13,7 @@ chapters:
 - workshop/setup.md
 - workshop/toc.md
 - - workshop/foundations.md
+- - workshop/resources.md
+- - workshop/k6.md
+- - workshop/vpa.md
 

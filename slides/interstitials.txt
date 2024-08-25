@@ -1,9 +1,7 @@
-./images/interstitials/1.jpg
-./images/interstitials/2.jpg
-./images/interstitials/3.jpg
-./images/interstitials/4.jpg
-./images/interstitials/5.jpg
-./images/interstitials/6.jpg
-./images/interstitials/7.jpg
+./images/interstitials/1.webp
+./images/interstitials/2.webp
+./images/interstitials/3.webp
+./images/interstitials/4.webp
+
 
 
