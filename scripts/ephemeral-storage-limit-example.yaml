@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: pod-with-volume
+  name: pod-with-volume
+spec:
+  containers:
+  - image: alpine
+    name: pod-with-volume
+    command: 
+    - sh
+    - -c
+    - "dd if=/dev/urandom of=myrandom bs=1000 count=2000 && sleep 30000"
+    resources:
+      limits:
+        ephemeral-storage: 100Ki 
+    volumeMounts:
+      - name: myvol
+        mountPath: /test
+  volumes:
+    - name: myvol
+      emptyDir:
+        sizeLimit: 500Mi   
