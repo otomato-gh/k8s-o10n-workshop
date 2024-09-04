@@ -882,7 +882,7 @@ spec:
 
 - In each namespace, create a LimitRange object
 
-- Set a small default CPU request and CPU limit
+- Set a small default CPU request
 
   (e.g. "100m")
 
@@ -987,14 +987,5 @@ spec:
 
   - controller to automatically populate a Namespace when it is created
 
-???
 
-:EN:- Setting compute resource limits
-:EN:- Defining default policies for resource usage
-:EN:- Managing cluster allocation and quotas
-:EN:- Resource management in practice
 
-:FR:- Allouer et limiter les ressources des conteneurs
-:FR:- Définir des ressources par défaut
-:FR:- Gérer les quotas de ressources au niveau du cluster
-:FR:- Conseils pratiques
