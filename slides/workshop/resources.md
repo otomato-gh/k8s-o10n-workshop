@@ -624,7 +624,7 @@ per Pod, but it's not [officially documented yet](https://github.com/kubernetes/
 ```
 - Verify the default resources were applied
 ```
-  kubectl get pod rangeme -ojsonpath="{ spec.containers[0].resources }"
+  kubectl get pod rangeme -ojsonpath="{ .spec.containers[0].resources }"
 ```
 - Delete the pod and the LimitRange
 ```bash
