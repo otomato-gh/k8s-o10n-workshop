@@ -14,6 +14,11 @@ chapters:
 - workshop/toc.md
 - - workshop/foundations.md
 - - workshop/resources.md
+- - workshop/gpu.md
 - - workshop/k6.md
 - - workshop/vpa.md
+  - workshop/hpa.md
+#  - workshop/hpa-v2.md
+  - workshop/cluster-sizing.md
+- workshop/summary.md
 

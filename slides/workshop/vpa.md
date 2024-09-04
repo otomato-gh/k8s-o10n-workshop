@@ -37,9 +37,56 @@ spec:
     name:       crypter
   updatePolicy:
     updateMode: "Auto"
+    minReplicas: 1
 ```
+.lab[
+```
+    kubectl apply -f ~/k8s-o10n-workshop/scripts/vpa.yaml
+```
+]
+
 ---
 
+## Triggering the VPA
 
+- Let's rerun our tests
+
+.lab[
+```bash
+    kubectl delete testruns.k6.io --all
+    cd ~/crypter/k6
+    kubectl apply -f testrun.yaml
+```
+While the test is running - monitor the state of the VPA:
+```bash
+    kubectl get verticalpodautoscaler crypter-vpa
+```
+And the updater logs:
+```bash
+    kubectl logs -n kube-system -l app=vpa-updater -f
+```
+]
+
+---
+
+## VPA - the good parts
+
+- Easy to set up
+
+- Only requires metrics-server to operate
+
+- Gets rid of guesswork when  setting resources
+
+---
+
+## VPA - the worse parts
+
+- Need to configure per workload
+
+- Relies on the [decaying histogram](https://github.com/kubernetes/autoscaler/blob/vertical-pod-autoscaler-0.8.0/vertical-pod-autoscaler/pkg/recommender/util/decaying_histogram.go#L43) algorithm (not revision-aware)
+
+- Blocks config changes (need to turn off admission controller and updater )
+
+- Not a good fit for highly volatile workloads in Auto mode (can cause a lot of restarts)
 
 

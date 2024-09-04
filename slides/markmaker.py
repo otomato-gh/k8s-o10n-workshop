@@ -118,7 +118,22 @@ def generatefromyaml(manifest, filename):
     html = html.replace("@@GITREPO@@", manifest["gitrepo"])
     html = html.replace("@@SLIDES@@", manifest["slides"])
     html = html.replace("@@TITLE@@", manifest["title"].replace("\n", " "))
+    
+    # Process @@LINK[file] and @@INCLUDE[file] directives
+    local_anchor_path = ".."
+    # FIXME use dynamic repo and branch?
+    online_anchor_path = "https://github.com/otomato/k8s-o10n-workshop/tree/main"
+    for atatlink in re.findall(r"@@LINK\[[^]]*\]", html):
+        logging.debug("Processing {}".format(atatlink))
+        file_name = atatlink[len("@@LINK["):-1]
+        html = html.replace(atatlink, "[{}]({}/{})".format(file_name, online_anchor_path, file_name ))
+    for atatinclude in re.findall(r"@@INCLUDE\[[^]]*\]", html):
+        logging.debug("Processing {}".format(atatinclude))
+        file_name = atatinclude[len("@@INCLUDE["):-1]
+        file_path = os.path.join(local_anchor_path, file_name)
+        html = html.replace(atatinclude, open(file_path).read())
     return html
+
 
 
 # Maps a section title (the string just after "^# ") to its position

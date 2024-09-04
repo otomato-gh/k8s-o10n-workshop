@@ -25,6 +25,8 @@ Kubernetes or not - application performance is impacted by the following:
     -   Network
     -   Compute (cpu time)
     -   Memory
+
+    (Finally - related to Kubernetes!)
 <br clear="right"/>
 --
 
@@ -84,7 +86,7 @@ The following areas relate to storage:
 
 - Since v1.29 kube-proxy supports using nftables instead of the iptables and there's a [KEP](https://github.com/kubernetes/enhancements/blob/master/keps/sig-network/3866-nftables-proxy) proposing making it the default backend for kube-proxy.
 
-- nftables bring preformance improvements over iptables, but the main motivation for this change is the gradual iptables deprecation. 
+- nftables bring performance improvements over iptables, but the main motivation for this change is the gradual iptables deprecation. 
 
 ---
 ## Replacing kube-proxy with Cilium or Calico
@@ -159,9 +161,9 @@ machine_id="",system_uuid=""} 8
 
 - We could use a self-hosted solution like Prometheus
 
-- Or we could use metrics-server
+- Or we could use `metrics-server`
 
-- What's special about metrics-server?
+- What's special about `metrics-server`?
 
 ---
 

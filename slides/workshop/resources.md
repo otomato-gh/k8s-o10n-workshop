@@ -8,7 +8,10 @@
 
 - We can specify quantities of CPU and/or memory and/or ephemeral storage
 
+- We can also specify GPU resources using device plugins 
+
 - Support for allocating additional resources is on the way through [Dynamic Resource Allocation](https://kubernetes.io/docs/concepts/scheduling-eviction/dynamic-resource-allocation/)
+
 
 ---
 
@@ -334,6 +337,7 @@ class: extra-details
 
   - better control on the amount of swap used by a container
 
+Check out this [post](https://www.perfectscale.io/blog/cgroups-and-memoryqos-w-bottlerocket) for a deeper dive into Cgroups v2
 ---
 
 class: extra-details
@@ -605,6 +609,29 @@ per Pod, but it's not [officially documented yet](https://github.com/kubernetes/
 
 - If a LimitRange specifies a `max` for a resource but no `default`,
   <br/>that `max` value becomes the `default` limit too
+---
+
+## LimitRange Exercise
+
+.lab[
+  - Create a LimitRange with some default values
+```bash
+  kubectl create -f scripts/limitrange.yaml
+```
+- Create an nginx pod (no resource definitions)
+```bash
+  kubectl run rangeme --image=nginx
+```
+- Verify the default resources were applied
+```
+  kubectl get pod rangeme -ojsonpath="{ spec.containers[0].resources }"
+```
+- Delete the pod and the LimitRange
+```bash
+   kubectl delete -f scripts/limitrange.yaml
+   kubectl delete pod rangeme
+```
+]
 
 ---
 
