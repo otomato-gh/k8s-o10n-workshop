@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: busy
+  name: busy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: busy
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: busy
+    spec:
+      priorityClassName: low-priority
+      containers:
+      - image: otomato/busyhttp
+        name: busyhttp
+        resources:
+          limits:
+            memory: "128Mi"
+          requests:
+            memory: "250Mi"
+            cpu: "250m"
