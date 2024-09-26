@@ -23,7 +23,7 @@ spec:
         name: busyhttp
         resources:
           limits:
-            memory: "128Mi"
+            memory: "150Mi"
           requests:
-            memory: "250Mi"
+            memory: "150Mi"
             cpu: "250m"
