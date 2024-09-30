@@ -5,8 +5,9 @@ class: title, in-person
 
 
 .footnote[
-*Presented by Anton Weiss*<br/>
-*PerfectScale.*<br/>
+*Presented by Ivan Yurochko*<br/>
+*Created by Anton Weiss*<br/>
+*PerfectScale*<br/>
 *https://perfectscale.io*
 
 **Slides: @@SLIDES@@**

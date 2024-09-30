@@ -1,25 +1,12 @@
 ## Set up Our Lab
 
-Running on k3d
+Running on AWS training environment
 
-- We're going to start out training with [k3d](https://k3d.io) 
+- We're going to run our cluster on EKS
 
-- It spins up `k3s` inside containers. Each node in the cluster is actually a container.
+- Enter the event
 
-- This doesn't provide resource isolation, but it's good enough for what we want to showcase.
+- Access the AWS console
 
----
-## Create the Cluster
+- Open Cloud9 for CLI access to the cluster
 
-.lab[
-```bash
-    git clone https://github.com/otomato-gh/k8s-o10n-workshop.git
-    cd k8s-o10n-workshop/scripts
-    ./setup.sh
-```
-]
-
-Verify the cluster was created:
-```bash
-kubectl get node
-```
