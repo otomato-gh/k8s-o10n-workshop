@@ -10,3 +10,10 @@ Running on AWS training environment
 
 - Open Cloud9 for CLI access to the cluster
 
+- Clone the training examples repo: 
+
+.lab[
+```bash
+    git clone https://github.com/otomato-gh/k8s-o10n-workshop.git
+```
+]
