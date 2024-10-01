@@ -11,7 +11,7 @@ spec:
     name: busyhttp
     resources:
       limits:
-        memory: 50Mi
+        memory: 20Mi
   dnsPolicy: ClusterFirst
   restartPolicy: Always
 status: {}

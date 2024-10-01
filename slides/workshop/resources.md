@@ -223,17 +223,17 @@ For more details, check [this blog post](https://erickhun.com/posts/kubernetes-f
 
 ## Memory limits on Kubernetes
 
-- Kubernetes *does not support swap*
+- Kubernetes *used to have no support for swap*
 
-  (but it may support it in the future, thanks to [KEP 2400])
+- Limited [swap memory support] is available in Beta since v1.28
 
-- If a container exceeds its memory *limit*, it gets killed immediately
+- Without swap - if a container exceeds its memory *limit*, it gets killed immediately
 
 - If a node memory usage gets too high, it will *evict* some pods
 
   (we say that the node is "under pressure", more on that in a bit!)
 
-[KEP 2400]: https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/2400-node-swap/README.md#implementation-history
+[swap memory suppport]: https://kubernetes.io/docs/concepts/architecture/nodes/#swap-memory
 
 ---
 

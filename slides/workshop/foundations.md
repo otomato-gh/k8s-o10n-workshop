@@ -99,6 +99,14 @@ The following areas relate to storage:
 
     -   It shows that eBPF is clearly superior to `iptables` but not clear if the same is true for IPVS
 
+---
+
+## Optimizing Kubernetes Networking - Additional Considerations
+
+- Use scheduling constraints (node and pod affinity) to avoid nosiy neighbours occupying all of the bandwidth
+
+- Consider [topology-aware routing](https://kubernetes.io/docs/concepts/services-networking/topology-aware-routing/) (in beta since v1.24) to improve latencies
+  - Can improve performance, relaibility and cost.
 
 ---
 ## Measuring Resources on Kubernetes
@@ -124,7 +132,8 @@ Container resource allocation and consumption on Kubernetes is collected and exp
 
 .lab[
 ```bash
-kubectl get --raw "/api/v1/nodes/k3d-training-agent-0/proxy/metrics/cadvisor"
+NODE0=$(kubectl get node -ojsonpath="{ .items[0].metadata.name }")
+kubectl get --raw "/api/v1/nodes/${NODE0}/proxy/metrics/cadvisor"
 ```    
 ]
 
@@ -262,13 +271,6 @@ kubectl top pod -A
 
 - Do not aim for 100% memory usage!
 
-- Some more realistic targets:
-
-  50% (for workloads with disk I/O and leveraging caching)
-
-  90% (on very big nodes with mostly CPU-bound workloads)
-
-  75% (anywhere in between!)
 
 ---
 
