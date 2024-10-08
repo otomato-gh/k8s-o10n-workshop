@@ -29,19 +29,19 @@ cd autoscaler/vertical-pod-autoscaler
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: crypter-vpa
+  name: busyhttp-vpa
 spec:
   targetRef:
     apiVersion: "apps/v1"
     kind:       Deployment
-    name:       crypter
+    name:       busyhttp
   updatePolicy:
     updateMode: "Auto"
     minReplicas: 1
 ```
 .lab[
 ```
-    kubectl apply -f ~/k8s-o10n-workshop/scripts/vpa.yaml
+    kubectl apply -f ~/k8s-o10n-workshop/scripts/vpa-busyhttp.yaml
 ```
 ]
 
@@ -49,23 +49,45 @@ spec:
 
 ## Triggering the VPA
 
-- Let's rerun our tests
+- Let's deploy busyhttp with no resource definitions (if it's not running yet)
 
 .lab[
 ```bash
-    kubectl delete testruns.k6.io --all
-    cd ~/crypter/k6
-    kubectl apply -f testrun.yaml
+    kubectl create deployment busyhttp --image=otomato/busyhttp:memory
 ```
-While the test is running - monitor the state of the VPA:
+Now let's create some cpu load
 ```bash
-    kubectl get verticalpodautoscaler crypter-vpa
+    kubectl run netutils --image=otomato/net-utils "ping localhost"
+    kubectl exec netutils -- httping http://busyhttp/
 ```
-And the updater logs:
+
+Watch pod cpu usage go up:
 ```bash
-    kubectl logs -n kube-system -l app=vpa-updater -f
+    kubectl top pod -lapp=busyhttp
+```
+
+]
+---
+
+## Monitor the VPA status
+
+- Let's see what happens in the VPA
+
+.lab[
+```bash
+kubectl get vpa busyhttp
 ```
 ]
+
+- And the updater logs:
+
+.lab[
+```bash
+kubectl logs -n kube-system -l app=vpa-updater -f
+```
+]
+
+- Note:  `updatePolicy.minReplicas: 1` allows to evict the pod even if it's the only one in Deployment
 
 ---
 

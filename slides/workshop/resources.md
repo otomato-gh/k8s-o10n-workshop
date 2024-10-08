@@ -225,15 +225,31 @@ For more details, check [this blog post](https://erickhun.com/posts/kubernetes-f
 
 - Kubernetes *used to have no support for swap*
 
-- Limited [swap memory support] is available in Beta since v1.28
+- Limited [swap memory support](https://kubernetes.io/docs/concepts/architecture/nodes/#swap-memory) is available in Beta since v1.28
 
 - Without swap - if a container exceeds its memory *limit*, it gets killed immediately
 
 - If a node memory usage gets too high, it will *evict* some pods
 
-  (we say that the node is "under pressure", more on that in a bit!)
+  (we say that the node is "under pressure")
 
-[swap memory suppport]: https://kubernetes.io/docs/concepts/architecture/nodes/#swap-memory
+
+---
+
+## Run an examlpe
+
+- Let's see an OOMKill in action
+
+.lab[
+```
+  kubectl apply -f ~/environment/k8s-o10n-workshop/scripts/oomkill.yaml
+  kubectl get pod -w
+```
+]
+
+- This runs a pod with a Python-flask webapp that requires ~40Mb to run  but has the limit of 20Mb defined in the yaml. It will get killed and restarted.
+
+- We will fix the issue later
 
 ---
 
@@ -861,6 +877,49 @@ spec:
       scopeName: PriorityClass
       values: ["high-priority"]
 ```
+---
+
+## Resource Quota with Scopes - Exercise
+
+.lab[
+- Create a new namespace and switch into it
+```bash
+kubectl create ns withquota
+kubectl config set-context --current --namespace=withquota
+```
+- Define a PriorityClass for low-priority pods
+```bash
+kubectl apply -f scripts/unimportant-priority.yaml
+```
+- Define a quota limiting such low-priority pods
+```bash
+kubectl apply -f scripts/quota-for-low-priority.yaml
+```
+]
+
+---
+
+## Resource Quota with Scopes - Exercise
+
+.lab[
+- Create deployment for low-priority pods 
+```bash
+kubectl apply -f scripts/deploy-low-priority.yaml
+```
+- Scale the deployment `busy` to 10 replicas
+```bash
+kubectl scale deploy/busy --replicas=10
+```
+- Verify the quota gets applied
+
+- Change the quota to allow all the required memory for our `busy` deployment to scale out to 10 replicas
+
+- Switch back to the default namespace:
+```bash
+kubectl config set-context --current --namespace=default
+```
+
+]
 
 ---
 

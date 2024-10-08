@@ -14,7 +14,7 @@ chapters:
 - workshop/toc.md
 - - workshop/foundations.md
 - - workshop/resources.md
-- - workshop/gpu.md
+# - - workshop/gpu.md
 - - workshop/k6.md
 - - workshop/vpa.md
   - workshop/hpa.md
