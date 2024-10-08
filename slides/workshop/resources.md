@@ -57,6 +57,19 @@
 
 ---
 
+## Check the Resource Definitions
+
+- Let's check the resources defined for pods we currently have in cluster
+
+.lab[
+```bash
+kubectl get pod -A -ojson | \
+   jq ".items[] | {name:.metadata.name} + {resources:.spec.containers[].resources} "
+```
+]
+
+---
+
 ## Compressible vs incompressible resources
 
 - CPU is a *compressible resource*
@@ -248,6 +261,23 @@ For more details, check [this blog post](https://erickhun.com/posts/kubernetes-f
 ]
 
 - This runs a pod with a Python-flask webapp that requires ~40Mb to run  but has the limit of 20Mb defined in the yaml. It will get killed and restarted.
+
+- We will fix the issue later
+
+---
+
+## Run an examlpe
+
+- Let's see an OOMKill in action
+
+.lab[
+```
+  kubectl apply -f ~/environment/k8s-o10n-workshop/scripts/oomkill.yaml
+  kubectl get pod -w
+```
+]
+
+- This runs a pod with a Python-flask webapp that requires ~80Mb to run  but has the limit of 50Mb defined in the yaml. It will get killed and restarted.
 
 - We will fix the issue later
 
@@ -491,6 +521,26 @@ This set of resources makes sure that this service won't be killed (as long as i
 
 ---
 
+## Fix the busyhttp pod memory allocation
+
+- Edit the pod definition in `scripts/oomkill.yaml`
+
+- Fix memory allocation by doubling the memory limit of the container
+
+- Create the new pod.
+
+- Verify the there's no more OOMkill
+
+- Check the pod QoS:
+
+.lab[
+```bash
+  kubectl get pod busyhttp  -ojsonpath="{ .status.qosClass }"
+```
+]
+
+---
+
 ## Default values
 
 - If we specify a limit without a request: 
@@ -642,13 +692,52 @@ per Pod, but it's not [officially documented yet](https://github.com/kubernetes/
 ```
   kubectl get pod rangeme -ojsonpath="{ .spec.containers[0].resources }"
 ```
-- Delete the pod and the LimitRange
+- Delete the pod
 ```bash
-   kubectl delete -f scripts/limitrange.yaml
    kubectl delete pod rangeme
 ```
 ]
 
+---
+
+## LimitRange Exercise - Non-compliant Pod
+
+.lab[
+  - Create a LimitRange with max and min values
+```bash
+  kubectl create -f scripts/limitrange-min-max.yaml
+  kubectl describe limitrange min-max
+```
+- Install nginx with bitnami chart and nano resources preset
+```bash
+  helm install nginx oci://registry-1.docker.io/bitnamicharts/nginx \
+   --set resourcesPreset=nano
+```
+- Check if the pod was created
+```bash
+kubectl get pod -lapp.kubernetes.io/name=nginx
+```
+]
+
+- Where's our pod?
+
+---
+## LimitRange Exercise - Non-compliant Pod
+
+- Looks like the pod wasn't created!
+
+.lab[
+  - Analyze what happened
+```bash
+kubectl describe rs  -lapp.kubernetes.io/name=nginx
+```
+- Delete the LimitRange
+```bash
+  kubectl delete limitrange min-max
+```
+]
+
+- In approximately 5 min the replicaset will reconcile and finally create the pod
 ---
 
 # Namespace quotas
@@ -914,11 +1003,14 @@ kubectl scale deploy/busy --replicas=10
 
 - Change the quota to allow all the required memory for our `busy` deployment to scale out to 10 replicas
 
+<<<<<<< HEAD
 - Switch back to the default namespace:
 ```bash
 kubectl config set-context --current --namespace=default
 ```
 
+=======
+>>>>>>> found
 ]
 
 ---

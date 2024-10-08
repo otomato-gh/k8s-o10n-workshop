@@ -40,8 +40,8 @@ Kubernetes or not - application performance is impacted by the following:
 The following areas relate to storage:
 
 - Container image storage
-    -   Optimize container images
-    -   Pre-Pull container images
+    -   Optimize container images ([distroless](https://github.com/GoogleContainerTools/distroless))
+    -   Pre-Pull container images ([kube-fledged](https://github.com/senthilrch/kube-fledged))
 
 - Ephemeral volumes
     - Local volumes
@@ -66,7 +66,7 @@ The following areas relate to storage:
 ---
 ## kube-router, IPVS
 
-- It is possible to tell kube-proxy to use IPVS
+- It is possible to tell kube-proxy to use [IPVS](https://kubernetes.io/docs/reference/networking/virtual-ips/#proxy-mode-ipvs)
 
 - IPVS is a more powerful load balancing framework
 
@@ -97,7 +97,7 @@ The following areas relate to storage:
 
 - A network performance benchmark for both can be found here:  https://cilium.io/blog/2021/05/11/cni-benchmark/
 
-    -   It shows that eBPF is clearly superior to `iptables` but not clear if the same is true for IPVS
+    -   It shows that eBPF is clearly superior to `iptables` but not clear if the same is true for IPVS or nftables
 
 ---
 
@@ -115,15 +115,16 @@ Container resource allocation and consumption on Kubernetes is collected and exp
 
 <img align="right" src="images/metrics-pipeline.png">
 
-- cAdvisor: Daemon for collecting, aggregating and exposing container metrics included in Kubelet.
+- `cAdvisor`: Daemon for collecting, aggregating and exposing container metrics included in Kubelet.
 
-- kubelet: The Node agent. Resource metrics are accessible using the /metrics/resource and /stats kubelet API endpoints.
+- `kubelet`: The Node agent. Resource metrics are accessible using the /metrics/resource and /stats kubelet API endpoints.
 
-- metrics-server: Cluster addon component that collects and aggregates resource metrics pulled from each kubelet. The API server serves Metrics API for use by HPA, VPA, and by the kubectl top command. Metrics Server is a reference implementation of the Metrics API.
+- `metrics-server`: Cluster addon component that collects and aggregates resource metrics pulled from each kubelet. The API server serves Metrics API for use by HPA, VPA, and by the kubectl top command. Metrics Server is a reference implementation of the Metrics API.
 
 <br clear="right"/>
 
 ---
+
 ## Exploring the cAdvisor metrics
 
 - The full cAdvisor metrics are acessible via the api server
@@ -206,7 +207,23 @@ Pros:
 
 - It's required for autoscaling anyway
 
-- It's already installed in `k3d`
+---
+
+## Install the metrics server
+
+- Apply the installation yaml
+.lab[
+```bash  
+  kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+```
+]
+
+- Verify
+.lab[
+```bash
+  kubectl top node
+```
+]
 
 ---
 
@@ -229,7 +246,8 @@ Once `metrics-server` is added to the cluster - CPU and memory usage for the nod
 
 .lab[
 ```bash
-kubectl get --raw "/apis/metrics.k8s.io/v1beta1/nodes/k3d-training-agent-0" | jq
+export NODE0=$(kubectl get node -ojsonpath="{ .items[0].metadata.name }")
+kubectl get --raw "/apis/metrics.k8s.io/v1beta1/nodes/$NODE0" | jq
 
 ```    
 ]
@@ -238,7 +256,7 @@ The resulting JSON is a part of what we get in `kubectl top node`
 
 .lab[
 ```bash
-kubectl top node k3d-training-agent-0
+kubectl top node $NODE0
 ```
 ]
 ---
