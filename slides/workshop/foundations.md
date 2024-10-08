@@ -125,8 +125,8 @@ Container resource allocation and consumption on Kubernetes is collected and exp
 
 .lab[
 ```bash
-NODE1=$(kubectl get node -ojsonpath="{ .items[].metadata.name }")
-kubectl get --raw "/api/v1/nodes/${NODE1}/proxy/metrics/cadvisor"
+NODE0=$(kubectl get node -ojsonpath="{ .items[].metadata.name }")
+kubectl get --raw "/api/v1/nodes/${NODE0}/proxy/metrics/cadvisor"
 ```    
 ]
 
