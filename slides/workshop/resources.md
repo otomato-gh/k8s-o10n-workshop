@@ -214,6 +214,104 @@ class: extra-details
 
 For more details, check [this blog post](https://erickhun.com/posts/kubernetes-faster-services-no-cpu-limits/) or these ones ([part 1](https://engineering.indeedblog.com/blog/2019/12/unthrottled-fixing-cpu-limits-in-the-cloud/), [part 2](https://engineering.indeedblog.com/blog/2019/12/cpu-throttling-regression-fix/)).
 
+
+---
+
+## CPU Limits in Action
+
+- Create a deployment file for `busyhttp` - a web service that uses 1 second of CPU time for each request it serves:
+
+.lab[
+```bash
+kubectl create deployment --dry-run -oyaml busy --image=otomato/busyhttp:0.2 > deployment.yaml
+```
+]
+
+- Edit `deployment.yaml` to set CPU requests and limits to 50 millicores: `50m`
+
+.lab[
+```yaml
+        resources:
+          requests:
+            cpu: 50m
+          limits:
+            cpu: 50m
+```
+]
+
+---
+
+## CPU Limits in Action
+
+.lab[
+- Now create the deployment and a service by running:
+
+```bash
+kubectl apply -f deployment.yaml
+kubectl expose deploy/busy --port 80
+```
+]
+
+---
+
+## Watch the metrics:
+
+- In a separate shell - watch CPU utilization:
+
+.lab[
+```bash
+watch -n 0.5 kubectl top pod
+```
+]
+
+- And watch the CPU throttling metrics:
+
+.lab[
+```bash
+export NODE=$(kubectl get pod -l app=busyhttp -ojsonpath="{ .items[0].spec.nodeName }")
+watch -n 0.5 "kubectl get --raw "/api/v1/nodes/$NODE/proxy/metrics/cadvisor" | grep throttled
+```
+]
+
+
+---
+
+## Test CPU Limits in Action
+
+.lab[
+ -  Run `ab` to measure the latency
+```bash
+kubectl run -it --rm tester --image=otomato/net-utils -- "ping localhost"
+```
+ - Entoer the tester container and run a benchmark
+```bash
+kubectl exec -it tester -- sh
+ab -c 20 -n 20 http://busy
+```
+]
+
+- Check the latencies. Check the output of `kubectl top pod`. Check the throttling metrics.
+
+---
+
+## Without CPU Limits
+
+- Now update `deployment.yaml` to unset CPU limits. Redeploy.
+
+- Check the latencies again. What changed?
+
+- Check the output of `kubectl top pod` and the throttling metrics.
+
+- Remove the deployment, the service and the `ping` pod:
+
+.lab[
+```bash
+kubectl delete pod tester
+kubect delete deployment busy
+kubectl delete svc busy
+```
+]
+
 ---
 
 ## Running low on memory
@@ -1003,14 +1101,11 @@ kubectl scale deploy/busy --replicas=10
 
 - Change the quota to allow all the required memory for our `busy` deployment to scale out to 10 replicas
 
-<<<<<<< HEAD
 - Switch back to the default namespace:
 ```bash
 kubectl config set-context --current --namespace=default
 ```
 
-=======
->>>>>>> found
 ]
 
 ---

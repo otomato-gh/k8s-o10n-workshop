@@ -207,11 +207,13 @@ Pros:
 
 - It's required for autoscaling anyway
 
+- It comes pre-installed on `k3d`!
+
 ---
 
 ## Install the metrics server
 
-- Apply the installation yaml
+- Apply the installation yaml (if not on k3d)
 .lab[
 ```bash  
   kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml

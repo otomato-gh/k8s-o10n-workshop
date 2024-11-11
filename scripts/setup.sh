@@ -25,7 +25,7 @@ echo \
 sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin
 #install kubectl
-curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.18.0/bin/linux/amd64/kubectl
+curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.30.0/bin/linux/amd64/kubectl
 
 #Make the kubectl binary executable.
 chmod +x ./kubectl
@@ -37,7 +37,7 @@ echo "source <(kubectl completion bash)" >> ~/.bashrc
 
 sudo usermod -aG docker $USER 
 
-sudo curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=v4.0.0 bash
+sudo curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
 
 sudo k3d cluster create training -c cluster.yaml
 sudo mkdir $HOME/.kube
