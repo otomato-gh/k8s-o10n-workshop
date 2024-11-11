@@ -70,6 +70,49 @@ kubectl get pod -A -ojson | \
 
 ---
 
+## Specifying resources
+
+- Resource requests are expressed at the *container* level
+
+- CPU is expressed in "virtual CPUs"
+
+  (corresponding to the virtual CPUs offered by some cloud providers)
+
+- CPU can be expressed with a decimal value, or even a "milli" suffix
+
+  (so 100m = 0.1)
+
+- Memory and ephemeral disk storage are expressed in bytes
+
+- These can have k, M, G, T, ki, Mi, Gi, Ti suffixes
+
+  (corresponding to 10^3, 10^6, 10^9, 10^12, 2^10, 2^20, 2^30, 2^40)
+
+---
+
+## Specifying resources in practice
+
+This is what the spec of a Pod with resources will look like:
+
+```yaml
+containers:
+- name: busy
+  image: perfectscale/pacmem
+  resources:
+    limits:
+      cpu: "100m"
+      ephemeral-storage: 10M
+      memory: "100Mi"
+    requests:
+      cpu: "10m"
+      ephemeral-storage: 10M
+      memory: "100Mi"
+```
+
+This set of resources makes sure that this service won't be killed (as long as it stays below 100 MB of RAM), but allows its CPU usage to be throttled if necessary.
+
+---
+
 ## Compressible vs incompressible resources
 
 - CPU is a *compressible resource*
@@ -268,8 +311,8 @@ watch -n 0.5 kubectl top pod
 
 .lab[
 ```bash
-export NODE=$(kubectl get pod -l app=busyhttp -ojsonpath="{ .items[0].spec.nodeName }")
-watch -n 0.5 "kubectl get --raw "/api/v1/nodes/$NODE/proxy/metrics/cadvisor" | grep throttled
+export NODE=$(kubectl get pod -l app=busy -ojsonpath="{ .items[0].spec.nodeName }")
+watch -n 0.5 "kubectl get --raw "/api/v1/nodes/$NODE/proxy/metrics/cadvisor" | grep throttled"
 ```
 ]
 
@@ -281,12 +324,13 @@ watch -n 0.5 "kubectl get --raw "/api/v1/nodes/$NODE/proxy/metrics/cadvisor" | g
 .lab[
  -  Run `ab` to measure the latency
 ```bash
-kubectl run -it --rm tester --image=otomato/net-utils -- "ping localhost"
+kubectl run tester --image=otomato/net-utils -- "ping localhost"
 ```
- - Entoer the tester container and run a benchmark
+ - Enter the tester container and run a benchmark
 ```bash
 kubectl exec -it tester -- sh
-ab -c 20 -n 20 http://busy
+ # run benchmark in the pod
+ab -c 20 -n 20 http://busy/
 ```
 ]
 
@@ -302,12 +346,14 @@ ab -c 20 -n 20 http://busy
 
 - Check the output of `kubectl top pod` and the throttling metrics.
 
+- Question: what happens if we set the CPU limit to `2` (the number of CPUs available?)
+
 - Remove the deployment, the service and the `ping` pod:
 
 .lab[
 ```bash
 kubectl delete pod tester
-kubect delete deployment busy
+kubectl delete deployment busy
 kubectl delete svc busy
 ```
 ]
@@ -353,29 +399,12 @@ kubectl delete svc busy
 
 .lab[
 ```
-  kubectl apply -f ~/environment/k8s-o10n-workshop/scripts/oomkill.yaml
+  kubectl apply -f ~/k8s-o10n-workshop/scripts/oomkill.yaml
   kubectl get pod -w
 ```
 ]
 
-- This runs a pod with a Python-flask webapp that requires ~40Mb to run  but has the limit of 20Mb defined in the yaml. It will get killed and restarted.
-
-- We will fix the issue later
-
----
-
-## Run an examlpe
-
-- Let's see an OOMKill in action
-
-.lab[
-```
-  kubectl apply -f ~/environment/k8s-o10n-workshop/scripts/oomkill.yaml
-  kubectl get pod -w
-```
-]
-
-- This runs a pod with a Python-flask webapp that requires ~80Mb to run  but has the limit of 50Mb defined in the yaml. It will get killed and restarted.
+- This runs a pod with a Python-flask webapp that requires ~40Mb to run but has the limit of 20Mb defined in the yaml. It will get killed and restarted.
 
 - We will fix the issue later
 
@@ -458,6 +487,24 @@ class: extra-details
 - If `imagefs` usage gets too high, kubelet will remove old images first
 
   (conversely, if `nodefs` usage gets too high, kubelet won't remove old images)
+
+---
+
+## Ephemeral Storage Limit in Action
+
+- Deploy the example pod:
+
+.lab[
+```bash
+kubectl apply -f ~/k8s-o10n-workshop/scripts/ephemeral-storage-limit-example.yaml
+kubectl get pod -w
+```
+]
+The container in the pod is filling up the volume attached to it:
+
+`dd if=/dev/urandom of=myrandom bs=1000 count=2000 && sleep 30000`.
+
+The volume will eventually grow beyond the defined limit of 100Ki and fail with an error.
 
 ---
 
@@ -576,48 +623,6 @@ Each pod is assigned a QoS class (visible in `status.qosClass`).
 
 ---
 
-## Specifying resources
-
-- Resource requests are expressed at the *container* level
-
-- CPU is expressed in "virtual CPUs"
-
-  (corresponding to the virtual CPUs offered by some cloud providers)
-
-- CPU can be expressed with a decimal value, or even a "milli" suffix
-
-  (so 100m = 0.1)
-
-- Memory and ephemeral disk storage are expressed in bytes
-
-- These can have k, M, G, T, ki, Mi, Gi, Ti suffixes
-
-  (corresponding to 10^3, 10^6, 10^9, 10^12, 2^10, 2^20, 2^30, 2^40)
-
----
-
-## Specifying resources in practice
-
-This is what the spec of a Pod with resources will look like:
-
-```yaml
-containers:
-- name: busy
-  image: perfectscale/pacmem
-  resources:
-    limits:
-      cpu: "100m"
-      ephemeral-storage: 10M
-      memory: "100Mi"
-    requests:
-      cpu: "10m"
-      ephemeral-storage: 10M
-      memory: "100Mi"
-```
-
-This set of resources makes sure that this service won't be killed (as long as it stays below 100 MB of RAM), but allows its CPU usage to be throttled if necessary.
-
----
 
 ## Fix the busyhttp pod memory allocation
 
@@ -1098,12 +1103,49 @@ kubectl apply -f scripts/deploy-low-priority.yaml
 kubectl scale deploy/busy --replicas=10
 ```
 - Verify the quota gets applied
+```bash
+kubectl get pod
+```
 
-- Change the quota to allow all the required memory for our `busy` deployment to scale out to 10 replicas
+- How many pods got created? Why?
 
-- Switch back to the default namespace:
+```bash
+kubectl describe rs -l app=busy
+```
+]
+---
+## Fixing the quota
+- Change the quota to allow all the required CPU for our `busy` deployment to scale out to 10 replicas
+
+.lab[
+```bash
+kubectl patch resourcequotas low-priority-quota \
+   --type='json' \
+  -p='[{"op": "replace", "path": "/spec/hard/cpu", "value": 3}]'
+```
+
+- Note that this allows a quota of more CPUs than we actually have
+
+- Cause the replicaset to get recreated so it can re-evaluate the quotas:
+```bash
+kubectl delete rs -lapp=busy
+```
+
+- Check the number of pods created
+
+- Repeat the process for memory limit
+
+]
+
+---
+## Cleanup
+
+.lab[
+
+- Switch back to the default namespace and cleanup:
 ```bash
 kubectl config set-context --current --namespace=default
+kubectl delete ns withquota
 ```
 
 ]
