@@ -20,6 +20,10 @@ Running on k3d
 ]
 
 Verify the cluster was created:
+.lab[
 ```bash
+newgrp docker 
+k3d kubeconfig get training > $HOME/.kube/config
 kubectl get node
 ```
+]

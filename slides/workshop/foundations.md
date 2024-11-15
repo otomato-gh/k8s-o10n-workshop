@@ -37,7 +37,7 @@ Kubernetes or not - application performance is impacted by the following:
 ---
 ## Optimizing Kubernetes Storage
 
-The following areas relate to storage:
+The following areas relate to storage (and aren't covered in this workshop):
 
 - Container image storage
     -   Optimize container images ([distroless](https://github.com/GoogleContainerTools/distroless))
@@ -233,9 +233,9 @@ Pros:
 
 - It runs a single Pod
 
-- That Pod will fetch metrics from all our Nodes
+- That Pod fetches metrics from all our Nodes
 
-- It will expose them through the Kubernetes API aggregation layer
+- It then exposes them through the Kubernetes API aggregation layer
 
   (we won't say much more about that aggregation layer; that's fairly advanced stuff!)
 

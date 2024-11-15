@@ -13,11 +13,19 @@ The Vertical Pod Autoscaler consists of 3 components:
 ## Install the VPA
 
 .lab[
-```
+```bash
 cd ~
 git clone https://github.com/kubernetes/autoscaler.git
 cd autoscaler/vertical-pod-autoscaler
 ./hack/vpa-up.sh
+```
+]
+
+- Make sure all the VPA components are running:
+
+.lab[
+```bash
+kubectl get pod -n kube-system | grep vpa
 ```
 ]
 
@@ -75,7 +83,7 @@ Watch pod cpu usage go up:
 
 .lab[
 ```bash
-kubectl get vpa busyhttp
+kubectl get vpa busyhttp-vpa
 ```
 ]
 
@@ -110,5 +118,7 @@ kubectl logs -n kube-system -l app=vpa-updater -f
 - Blocks config changes (need to turn off admission controller and updater )
 
 - Not a good fit for highly volatile workloads in Auto mode (can cause a lot of restarts)
+
+- Unaware of cluster node group/pool limitations.
 
 

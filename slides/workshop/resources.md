@@ -322,17 +322,22 @@ watch -n 0.5 "kubectl get --raw "/api/v1/nodes/$NODE/proxy/metrics/cadvisor" | g
 ## Test CPU Limits in Action
 
 .lab[
- -  Run `ab` to measure the latency
+-  Run `ab` to measure the latency
+
 ```bash
 kubectl run tester --image=otomato/net-utils -- "ping localhost"
 ```
- - Enter the tester container and run a benchmark
+
+- Enter the tester container and run a benchmark
+
 ```bash
 kubectl exec -it tester -- sh
  # run benchmark in the pod
-ab -c 20 -n 20 http://busy/
+ab -c 20 -n 20 http://busy/cpu/2
 ```
 ]
+
+- Each request loads 1 CPU for 1 second. The test sends 20 parallel requests and returns the measured latencies.
 
 - Check the latencies. Check the output of `kubectl top pod`. Check the throttling metrics.
 
@@ -348,7 +353,7 @@ ab -c 20 -n 20 http://busy/
 
 - Question: what happens if we set the CPU limit to `2` (the number of CPUs available?)
 
-- Remove the deployment, the service and the `ping` pod:
+- Remove the deployment, the service and the `tester` pod:
 
 .lab[
 ```bash
@@ -626,11 +631,15 @@ Each pod is assigned a QoS class (visible in `status.qosClass`).
 
 ## Fix the busyhttp pod memory allocation
 
-- Edit the pod definition in `scripts/oomkill.yaml`
+- Double the memory limit in `scripts/oomkill.yaml`
 
-- Fix memory allocation by doubling the memory limit of the container
+- Re-create the pod:
 
-- Create the new pod.
+.lab[
+```bash
+  kubectl apply --force -f k8s-o10n-workshop/scripts/oomkill.yaml
+```
+]
 
 - Verify the there's no more OOMkill
 
@@ -638,7 +647,7 @@ Each pod is assigned a QoS class (visible in `status.qosClass`).
 
 .lab[
 ```bash
-  kubectl get pod busyhttp  -ojsonpath="{ .status.qosClass }"
+  kubectl get pod busyhttp -ogo-template='The pod is {{ .status.qosClass }} '
 ```
 ]
 
@@ -841,6 +850,20 @@ kubectl describe rs  -lapp.kubernetes.io/name=nginx
 ]
 
 - In approximately 5 min the replicaset will reconcile and finally create the pod
+
+--
+
+- Or we can delete the ReplicaSet - it will get recreated and create the Pod.
+
+---
+## Cleanup
+
+.lab[
+```bash
+helm delete nginx
+```
+]
+
 ---
 
 # Namespace quotas
